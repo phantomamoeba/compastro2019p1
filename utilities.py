@@ -4,6 +4,28 @@ Collection of utilities such as random selection of direction, conversion betwee
 import numpy as np
 import matplotlib.pyplot as plt
 
+def prand_seed(seed):
+    """
+    Update the pRNG seed
+    :param seed:
+    :return:
+    """
+    np.random.seed(seed)
+
+
+def cm2pc(cm):
+    """
+    cm to parsecs
+    :param cm:
+    :return:
+    """
+    return cm/3.086e18
+
+def pc2cm(pc):
+    """
+    parsecs to cm
+    """
+    return pc * 3.086e18
 
 def get_uniform_prob(seed=None):
     """
