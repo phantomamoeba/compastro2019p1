@@ -4,6 +4,19 @@ Collection of utilities such as random selection of direction, conversion betwee
 import numpy as np
 import matplotlib.pyplot as plt
 
+
+def get_uniform_prob(seed=None):
+    """
+    Return a single, uniform random # 0-1
+    :param seed: if provided, will (re) seed the pRNG
+    :return: number [0-1]
+    """
+
+    if seed is not None:
+        np.random.seed(seed)
+
+    return np.random.random()
+
 def get_direction(seed=None):
     """
     return a single coord tuple (theta, phi) where theta 0-pi and phi 0-2pi
@@ -21,6 +34,88 @@ def get_direction(seed=None):
 
     return theta,phi
 
+
+def get_interaction_dist(seed=None):
+    """
+    Return a randomly sampled distance to the (next) scattering encounter
+
+    :param seed:
+    :return: distance travel in cm
+    """
+    if seed is not None:
+        np.random.seed(seed)
+
+    t = -1. * np.log(np.random.random())
+    s_Th = 0.67e-24 #Thomson cross section (cm^2)
+    n_e = 60000. #electron number density, same as n_H = p_H / m_H ~ 59880.23952095808
+
+    return t/(s_Th * n_e)
+
+
+def sphere2cart(r,t,p):
+    """
+    Convert spherical polar coords to Cartessian
+    :param r: radius
+    :param t: polar angle (0-pi)
+    :param p: azimuthal angle (0-2pi)
+    :return: x,y,z
+    """
+
+    x = r * np.sin(t) * np.cos(p)
+    y = r * np.sin(t) * np.sin(p)
+    z = r * np.cos(t)
+
+    return x,y,z
+
+
+
+def prob_absorb(w):
+    """
+
+    Goes to constant ~ 20% for wavelengths < 0.05micron.
+    Approaches 0% on longer wavelegnths (0.06% by 1 micron).
+
+    :param w: wavelength in microns
+    :param density:
+    :return:
+    """
+
+    density_H = 1e-19 #g cm^-3
+    density_dust = 1e-3 * density_H
+    k_Th = (0.67e-24)/(1.67e-24) #cm^2/g Thomson opacity
+    k_0 = 100. #cm^2 g^-1
+    w_0 = 0.05 #microns
+    k_d = k_0 * (w/w_0)**(-2.) if (w > w_0) else k_0
+
+    return density_dust*k_d / (density_dust * k_d + density_H * k_Th)
+
+
+
+
+def test_interaction_dist(count=10000,bins=50,fn=None):
+    """
+    Plot histogram of interaction distances. Should be an exponential decay (like optical depth)
+    :param count: number of distances to get
+    :param bins: number of bins
+    :param fn: savefig to file, if provided
+    :return:
+    """
+    d = []
+    for i in range(count):
+        d.append(get_interaction_dist())
+
+    d = np.array(d)
+    d /= 3.086e18
+
+    plt.title("Interaction Distances (pc)")
+    plt.ylabel("count")
+    plt.xlabel("distance [pc]")
+    plt.hist(d, bins=bins)
+
+    if fn is None:
+        plt.show()
+    else:
+        plt.savefig(fn)
 
 
 def test_direction(count=10000,bins=50,fn=None):
@@ -72,44 +167,6 @@ def test_direction(count=10000,bins=50,fn=None):
         plt.show()
     else:
         plt.savefig(fn)
-
-
-def sphere2cart(r,t,p):
-    """
-    Convert spherical polar coords to Cartessian
-    :param r: radius
-    :param t: polar angle (0-pi)
-    :param p: azimuthal angle (0-2pi)
-    :return: x,y,z
-    """
-
-    x = r * np.sin(t) * np.cos(p)
-    y = r * np.sin(t) * np.sin(p)
-    z = r * np.cos(t)
-
-    return x,y,z
-
-
-
-def prob_absorb(w):
-    """
-
-    Goes to constant ~ 20% for wavelengths < 0.05micron.
-    Approaches 0% on longer wavelegnths (0.06% by 1 micron).
-
-    :param w: wavelength in microns
-    :param density:
-    :return:
-    """
-
-    density_H = 1e-19 #g cm^-3
-    density_dust = 1e-3 * density_H
-    k_Th = (0.67e-24)/(1.67e-24) #cm^2/g Thomson opacity
-    k_0 = 100. #cm^2 g^-1
-    w_0 = 0.05 #microns
-    k_d = k_0 * (w/w_0)**(-2.) if (w > w_0) else k_0
-
-    return density_dust*k_d / (density_dust * k_d + density_H * k_Th)
 
 
 def test_prob_absorb(fn=None):
