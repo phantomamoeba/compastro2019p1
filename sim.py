@@ -12,7 +12,8 @@ def main():
     #uncomment to set seed and make repeateable
     #utilities.prand_seed(137)
 
-    wavelengths = np.linspace(0.01,3.0,1000) #10AA-30,000AA
+    #wavelengths = np.linspace(0.01,3.0,1000) #10AA-30,000AA
+    wavelengths = np.logspace(-2, 0.5, 1000)  # 10AA ~ 30,000AA
 
     #photons = [photon.Photon(w) for w in wavelengths]*100
 
