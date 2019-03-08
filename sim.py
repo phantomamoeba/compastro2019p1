@@ -31,24 +31,32 @@ def main():
 
     print("Starting propogation ...")
 
+    #build up f_esc as we go
+    f_esc = np.zeros(len(wavelengths))
     for i in range(len(wavelengths)):
-        print("wavelength: %f [microns]" %(wavelengths[i]))
+        ct = 0
         for j in range(len(photons[i])):
-          while photons[i][j].status == 0:
-              photons[i][j].propogate()
+            while photons[i][j].status == 0:
+                photons[i][j].propogate()
+            if photons[i][j].status == 1:
+                ct += 1
+
+        f_esc[i] = float(ct)/len(photons[i])
+
+        print("wavelength: %f [microns] f_esc = %0.1f" % (wavelengths[i],f_esc[i]*100.))
 
 
-    result = [p.status for p in photons.flatten()]
 
-    n,b,_ = plt.hist(result,bins=2)
-    print(n,b)
-
-    plt.show()
+    #simple sanity check on total escape
+    # result = [p.status for p in photons.flatten()]
+    # n,b,_ = plt.hist(result,bins=2)
+    # print(n,b)
+    # plt.show()
 
     #results by wavelength
-    f_esc = np.zeros(len(wavelengths))
-    for i in range(len(f_esc)):
-        f_esc[i] = [p.status for p in photons[i]].count(1)/len(photons[i])
+    # f_esc = np.zeros(len(wavelengths))
+    # for i in range(len(f_esc)):
+    #     f_esc[i] = [p.status for p in photons[i]].count(1)/len(photons[i])
 
     plt.close('all')
     plt.plot(wavelengths,f_esc)
