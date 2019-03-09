@@ -37,6 +37,9 @@ def main():
     for i in range(len(wavelengths)):
         ct = 0
         for j in range(len(photons[i])):
+            #todo: optionally re-seed
+            utilities.prand_seed(None) #to use time
+
             while photons[i][j].status == 0:
                 photons[i][j].propogate()
             if photons[i][j].status == 1:
