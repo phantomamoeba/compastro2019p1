@@ -130,7 +130,7 @@ def main():
         #print("wavelength: %f [microns] f_esc = %0.1f" % (wavelengths[i],f_esc[i]*100.))
         progress_bar(float(i)/len_waves)
 
-    progress_bar(100.0)
+    progress_bar(1.0)
     print("\n")
     sims.append(f_esc)
     np.save("simrun_%d" %next_run_id, f_esc)
