@@ -41,7 +41,7 @@ def plot(fn=None):
     plt.fill_between(wavelengths,f_esc-f_esc_err,f_esc+f_esc_err,color='k',alpha=0.3,label=r"1-$\sigma$")
     plt.xscale('log')
     plt.legend()
-    plt.title("f_esc by wavelength")
+    plt.title("f_esc by wavelength (%d simulations)" %(len(simruns)))
     plt.xlabel("wavelength bin [microns]")
     plt.ylabel("fraction of escaped photons")
 
