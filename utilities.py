@@ -123,7 +123,7 @@ def test_interaction_dist(count=10000,bins=50,fn=None):
     :return:
     """
     d = []
-    for i in range(count):
+    for _ in range(count):
         d.append(get_interaction_dist())
 
     d = np.array(d)
@@ -151,7 +151,7 @@ def test_direction(count=10000,bins=50,fn=None):
     theta = []
     phi = []
 
-    for i in range(count):
+    for _ in range(count):
         t,p = get_direction()
         theta.append(t)
         phi.append(p)

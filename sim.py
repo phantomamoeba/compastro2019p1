@@ -13,7 +13,7 @@ def main():
     #utilities.prand_seed(137)
 
     #wavelengths = np.linspace(0.01,3.0,1000) #10AA-30,000AA
-    wavelengths = np.logspace(-2, 0.5, 1000)  # 10AA ~ 30,000AA
+    wavelengths = np.logspace(-2, 0.5, 100)  # 10AA ~ 30,000AA
 
     #photons = [photon.Photon(w) for w in wavelengths]*100
 
@@ -41,7 +41,7 @@ def main():
             utilities.prand_seed(None) #to use time
 
             while photons[i][j].status == 0:
-                photons[i][j].propogate()
+                photons[i][j].propagate()
             if photons[i][j].status == 1:
                 ct += 1
 

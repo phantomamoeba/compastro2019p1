@@ -6,14 +6,16 @@ Unless otherwise stated:
  wavelengths are in microns
 """
 
-import utilities
+import utilities as util
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 
-RADIUS_CLOUD_CM =  utilities.pc2cm(100.0) #cm
+RADIUS_CLOUD_CM =  util.pc2cm(100.0) #cm
 
 class Position:
+    # cartesian coords in cm 
+    
     def __init__(self,x,y,z):
         self.x = x
         self.y = y
@@ -23,7 +25,7 @@ class Position:
         return np.sqrt(np.power(self.x,2.) + np.power(self.y,2.) + np.power(self.z,2.))
 
     def radius_pc(self):
-        return np.sqrt(np.power(self.x,2.) + np.power(self.y,2.) + np.power(self.z,2.))/3.086e18
+        return util.cm2pc(self.radius())
 
 
 class Photon:
@@ -51,37 +53,37 @@ class Photon:
         else:
             return False
 
-    def is_abosorbed(self):
+    def is_absorbed(self):
         """
-        Perform a random draw to see if this photon is aborbed at this event.
+        Perform a random draw to see if this photon is absorbed at this event.
         Destructive ... can update the photon's status irreversibly and is non-deterministic.
         :return:boolean
         """
-        p = utilities.get_uniform_prob(seed=self.seed)
+        p = util.get_uniform_prob(seed=self.seed)
 
-        if p < utilities.prob_absorb(self.w):
+        if p < util.prob_absorb(self.w):
             self.status = -1
             return True
         else:
             return False
 
 
-    def propogate(self):
+    def propagate(self):
         """
-        Execute one propogation step. Results in one of:
+        Execute one propagation step. Results in one of:
             absorption, escape, or continue (scatter)
 
         :return:
         """
 
         #get a new direction, distance ... update position
-        t,p = utilities.get_direction()
-        r = utilities.get_interaction_dist()
+        t,p = util.get_direction()
+        r = util.get_interaction_dist()
 
         #this is relative to the current position
-        x,y,z = utilities.sphere2cart(r,t,p)
+        x,y,z = util.sphere2cart(r,t,p)
 
-        #add to current position to get aboslute position
+        #add to current position to get absolute position
         x += self.position.x
         y += self.position.y
         z += self.position.z
@@ -94,8 +96,8 @@ class Photon:
         if self.is_free():
             #we are done, photon is free
             return
-        elif self.is_abosorbed():
-            #are are done, photon is destroyed
+        elif self.is_absorbed():
+            #we are done, photon is destroyed
             return
         else:
             pass #still in the cloud
@@ -144,14 +146,14 @@ class Photon:
 
         ax.scatter3D(0,0,0,c='green',marker='o',s=20) #? plot the central star?
         if self.status == -1:
-            ax.scatter3D(utilities.cm2pc(self.position.x),
-                         utilities.cm2pc(self.position.y),
-                         utilities.cm2pc(self.position.z),c='red',marker='x',s=20)
+            ax.scatter3D(util.cm2pc(self.position.x),
+                         util.cm2pc(self.position.y),
+                         util.cm2pc(self.position.z),c='red',marker='x',s=20)
             title += " -- Destroyed"
         elif self.status == 1:
-            ax.scatter3D(utilities.cm2pc(self.position.x),
-                         utilities.cm2pc(self.position.y),
-                         utilities.cm2pc(self.position.z), c='orange', marker='o',s=20)
+            ax.scatter3D(util.cm2pc(self.position.x),
+                         util.cm2pc(self.position.y),
+                         util.cm2pc(self.position.z), c='orange', marker='o',s=20)
             title += " -- Escaped"
 
         ax.set_title(title)
