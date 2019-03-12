@@ -1,0 +1,7 @@
+ct=0
+while [ $ct -lt 30 ]; 
+do
+	python sim.py
+	ct=$((ct+1))
+done
+
