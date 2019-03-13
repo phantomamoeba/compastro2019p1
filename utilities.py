@@ -129,10 +129,13 @@ def test_interaction_dist(count=10000,bins=50,fn=None):
     d = np.array(d)
     d /= 3.086e18
 
+
+
     plt.title("Interaction Distances (pc)")
     plt.ylabel("count")
     plt.xlabel("distance [pc]")
     plt.hist(d, bins=bins)
+    plt.tight_layout()
 
     if fn is None:
         plt.show()
@@ -185,6 +188,8 @@ def test_direction(count=10000,bins=50,fn=None):
     plt.xlabel("radians")
     plt.hist(phi,bins=bins)
 
+    plt.tight_layout()
+
     if fn is None:
         plt.show()
     else:
@@ -209,6 +214,7 @@ def test_prob_absorb(fn=None):
     plt.xscale("log")
     plt.ylabel("Prob of Absorption")
     plt.xlabel(r"$\lambda$ [microns")
+    plt.tight_layout()
 
     if fn is None:
         plt.show()

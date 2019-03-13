@@ -11,6 +11,27 @@ import sys
 
 def plot(fn=None):
     #just plot
+
+    wavelengths, f_esc, f_esc_err, count = get_f_esc()
+
+    plt.close('all')
+    plt.plot(wavelengths,f_esc,label="mean f_esc")
+    plt.fill_between(wavelengths,f_esc-f_esc_err,f_esc+f_esc_err,color='k',alpha=0.3,label=r"1-$\sigma$")
+    plt.xscale('log')
+    plt.legend()
+    plt.title("f_esc by wavelength (%d simulations)" %(count))
+    plt.xlabel("wavelength bin [microns]")
+    plt.ylabel("fraction of escaped photons")
+
+    if fn is None:
+        plt.show()
+    else:
+        plt.savefig(fn)
+
+def get_f_esc():
+    #read the local numpy simruns and return the wavebin, f_esc, and error arrays
+
+
     wavelengths = np.load("wavelengths.npy")
 
     simruns = glob.glob("simrun_*.npy")
@@ -36,19 +57,8 @@ def plot(fn=None):
         f_esc[i] = np.mean(bin)
         f_esc_err[i] = np.std(bin)
 
-    plt.close('all')
-    plt.plot(wavelengths,f_esc,label="mean f_esc")
-    plt.fill_between(wavelengths,f_esc-f_esc_err,f_esc+f_esc_err,color='k',alpha=0.3,label=r"1-$\sigma$")
-    plt.xscale('log')
-    plt.legend()
-    plt.title("f_esc by wavelength (%d simulations)" %(len(simruns)))
-    plt.xlabel("wavelength bin [microns]")
-    plt.ylabel("fraction of escaped photons")
+    return wavelengths, f_esc, f_esc_err, len(simruns)
 
-    if fn is None:
-        plt.show()
-    else:
-        plt.savefig(fn)
 
 def progress_bar(percent, barLen = 20):
     sys.stdout.write("\r")
