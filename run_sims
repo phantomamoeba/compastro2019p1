@@ -1,5 +1,5 @@
 ct=0
-while [ $ct -lt 30 ]; 
+while [ $ct -lt 75 ]; 
 do
 	python sim.py
 	ct=$((ct+1))

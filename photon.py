@@ -59,6 +59,10 @@ class Photon:
         Destructive ... can update the photon's status irreversibly and is non-deterministic.
         :return:boolean
         """
+
+        #dummy ... simulate turning off dust
+        #return False
+
         p = util.get_uniform_prob(seed=self.seed)
 
         if p < util.prob_absorb(self.w):
