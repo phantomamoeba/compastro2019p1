@@ -54,7 +54,40 @@ def plot(fn=None):
     else:
         plt.savefig(fn)
 
+
+def get_super_f_esc():
+    #re-sampling ALL the runs to beat down the error
+    wavelengths = np.load("run_data/wavelengths.npy")
+
+    simruns = glob.glob("run_data/simrun_*.npy")
+    sims = []
+    for s in simruns:
+        try:
+            f_esc = np.load(s)
+            sims.append(f_esc)
+        except:
+            pass
+
+    f_esc = np.zeros(len(wavelengths))
+    f_esc_err = np.zeros(len(wavelengths))
+
+    sims = np.array(sims)
+
+    for i in range(len(wavelengths)):
+        f_super = sims[:,i]
+
+        sample = []
+        for j in range(100):
+            sample.append(np.mean(np.random.choice(f_super,size=100,replace=False)))
+
+        f_esc[i] = np.mean(sample)
+        f_esc_err[i] = np.std(sample)
+
+    return wavelengths, f_esc, f_esc_err, len(simruns)
+
+
 def get_f_esc():
+
     #read the local numpy simruns and return the wavebin, f_esc, and error arrays
     wavelengths = np.load("run_data/wavelengths.npy")
 
@@ -149,7 +182,7 @@ def run_sim():
     np.save("simrun_%d" %next_run_id, f_esc)
 
 def main():
-    wavelengths, f_esc, f_esc_err, count = get_f_esc()
+    wavelengths, f_esc, f_esc_err, count = get_super_f_esc()
 
     f_esc_high = f_esc + f_esc_err
     f_esc_low = f_esc-f_esc_err
@@ -170,7 +203,7 @@ def main():
     plt.yscale('log')
     plt.xscale('log')
     plt.xlabel("wavelength bin [microns]")
-    plt.ylabel(r"$\lambda$ $L_\lambda$ [erg s${}^{-1}$ cm${}^{-2}$]")
+    plt.ylabel(r"$\lambda$ $L_\lambda$ [erg s${}^{-1}$]")
 
     plt.savefig("spectrum_1.png")
     plt.show()
