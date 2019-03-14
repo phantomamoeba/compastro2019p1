@@ -150,10 +150,17 @@ def run_sim():
 
 def main():
     wavelengths, f_esc, f_esc_err, count = get_f_esc()
+
+    f_esc_high = f_esc + f_esc_err
+    f_esc_low = f_esc-f_esc_err
+    f_esc_high[f_esc_high > 100.0] = 100.0
+    f_esc_low[f_esc_low < 0.0] = 0.0
+
+
     L_lambd_source = blackbody(wavelengths)
     L_lambd_out = np.multiply(f_esc, L_lambd_source)    
-    L_lambd_low_err = np.multiply(f_esc-f_esc_err, L_lambd_source)
-    L_lambd_high_err = np.multiply(f_esc+f_esc_err, L_lambd_source)    
+    L_lambd_low_err = np.multiply(f_esc_low, L_lambd_source)
+    L_lambd_high_err = np.multiply(f_esc_high, L_lambd_source)
 
     plt.title("Radiation Spectra: source vs. escaped")
     plt.plot(wavelengths, L_lambd_source, label="Source radiation", color='r')
