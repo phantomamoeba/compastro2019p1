@@ -14,9 +14,14 @@ def plot(fn=None):
 
     wavelengths, f_esc, f_esc_err, count = get_f_esc()
 
+    f_esc_high = f_esc + f_esc_err
+    f_esc_low = f_esc-f_esc_err
+    f_esc_high[f_esc_high > 100.0] = 100.0
+    f_esc_low[f_esc_low < 0.0] = 0.0
+
     plt.close('all')
     plt.plot(wavelengths,f_esc,label="mean f_esc")
-    plt.fill_between(wavelengths,f_esc-f_esc_err,f_esc+f_esc_err,color='k',alpha=0.3,label=r"1-$\sigma$")
+    plt.fill_between(wavelengths,f_esc_low,f_esc_high,color='k',alpha=0.3,label=r"1-$\sigma$")
     plt.xscale('log')
     plt.legend()
     plt.title("f_esc by wavelength (%d simulations)" %(count))
