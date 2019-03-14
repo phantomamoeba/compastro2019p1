@@ -171,6 +171,8 @@ def main():
     plt.xscale('log')
     plt.xlabel("wavelength bin [microns]")
     plt.ylabel(r"$\lambda$ $L_\lambda$ [erg s${}^{-1}$ cm${}^{-2}$]")
+
+    plt.savefig("spectrum_1.png")
     plt.show()
 
 
