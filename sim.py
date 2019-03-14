@@ -37,7 +37,7 @@ def plot(fn=None):
 
     f_esc_high = f_esc + f_esc_err
     f_esc_low = f_esc-f_esc_err
-    f_esc_high[f_esc_high > 100.0] = 100.0
+    f_esc_high[f_esc_high > 1.0] = 1.0
     f_esc_low[f_esc_low < 0.0] = 0.0
 
     plt.close('all')
@@ -153,7 +153,7 @@ def main():
 
     f_esc_high = f_esc + f_esc_err
     f_esc_low = f_esc-f_esc_err
-    f_esc_high[f_esc_high > 100.0] = 100.0
+    f_esc_high[f_esc_high > 1.0] = 1.0
     f_esc_low[f_esc_low < 0.0] = 0.0
 
 
