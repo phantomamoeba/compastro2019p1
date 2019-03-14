@@ -9,9 +9,30 @@ import matplotlib.pyplot as plt
 import glob
 import sys
 
+h = 6.626e-27
+k = 1.381e-16
+T = 50000
+c = 2.998e10
+R_star = 200 * 69.551e9
+sb = 5.6704e-5
+
+def blackbody(wavelengths):
+    def B(lambd):
+        return (2*h*c**2/lambd**5)*(1/(np.exp(h*c/(lambd*k*T))-1))
+    L_lambd = []
+    for lambd in wavelengths:
+        L_lambd.append(4*np.pi*R_star**2 * np.pi * B(lambd/10000))
+    
+    delta_lambds = [(wavelengths[i+1]-wavelengths[i])/1e4 for i in range(len(wavelengths)-1)]
+    delta_lambds.append(delta_lambds[-1])
+    L_tot = sum(np.multiply(L_lambd, delta_lambds))
+    print("Integrated luminosity:", L_tot)
+    print("Theoretical luminosity:", 4*np.pi*R_star**2 * sb * T**4)
+
+    return L_lambd    
+
 def plot(fn=None):
     #just plot
-
     wavelengths, f_esc, f_esc_err, count = get_f_esc()
 
     plt.close('all')
@@ -30,20 +51,14 @@ def plot(fn=None):
 
 def get_f_esc():
     #read the local numpy simruns and return the wavebin, f_esc, and error arrays
+    wavelengths = np.load("run_data/wavelengths.npy")
 
-
-    wavelengths = np.load("wavelengths.npy")
-
-    simruns = glob.glob("simrun_*.npy")
+    simruns = glob.glob("run_data/simrun_*.npy")
     sims = []
     for s in simruns:
         try:
             f_esc = np.load(s)
             sims.append(f_esc)
-
-            run_id = int(s.split("_")[1].split('.'))
-            if run_id > next_run_id:
-                next_run_id = run_id
         except:
             pass
 
@@ -53,12 +68,11 @@ def get_f_esc():
     sims = np.array(sims)
 
     for i in range(len(f_esc)):
-        bin = sims[:, i]
-        f_esc[i] = np.mean(bin)
-        f_esc_err[i] = np.std(bin)
+        wave_bin = sims[:, i]
+        f_esc[i] = np.mean(wave_bin)
+        f_esc_err[i] = np.std(wave_bin)
 
     return wavelengths, f_esc, f_esc_err, len(simruns)
-
 
 def progress_bar(percent, barLen = 20):
     sys.stdout.write("\r")
@@ -71,12 +85,9 @@ def progress_bar(percent, barLen = 20):
     sys.stdout.write("[ %s ] %.2f%%" % (progress, percent * 100))
     sys.stdout.flush()
 
-def main():
-
+def run_sim():
     #uncomment to set seed and make repeateable
     #utilities.prand_seed(137)
-
-    #wavelengths = np.linspace(0.01,3.0,1000) #10AA-30,000AA
 
     #load the wavelenghts if they exist, otherwise create and save them (for future runs)
     try:
@@ -84,32 +95,22 @@ def main():
     except:
         wavelengths = np.logspace(-2, 0.5, 1000)  # 10AA ~ 30,000AA
         np.save("wavelengths",wavelengths)
-
     len_waves = len(wavelengths)
 
-    #photons = [photon.Photon(w) for w in wavelengths]*100
-
-    #5000 wavelengths, 100 photons each
-    #photons = np.array([[]*100 for w in wavelengths])
-
-
-    #load all previous runs
+    # calculate next run id
     next_run_id = 0
     simruns = glob.glob("simrun_*.npy")
-    sims = []
     for s in simruns:
         try:
             f_esc = np.load(s)
-            sims.append(f_esc)
-
             run_id = int(s.split("_")[1].split('.')[0])
             if run_id > next_run_id:
                 next_run_id = run_id
         except:
             pass
-
     next_run_id += 1
 
+    # create 100 initial photons per wave bin
     print("Creating 100x photon packets [%f, %f microns] in %d bins ..." %(wavelengths[0], wavelengths[-1],len_waves))
     photons = []
     for w in wavelengths:
@@ -117,12 +118,10 @@ def main():
         for i in range(100):
             same_w.append(photon.Photon(w))
         photons.append(same_w)
-
     photons = np.array(photons)
 
+    # Propagate photons, build up f_esc as we go
     print("Propagating simulation #%d ..." %(next_run_id) )
-
-    #build up f_esc as we go
     f_esc = np.zeros(len_waves)
     for i in range(len_waves):
         ct = 0
@@ -142,38 +141,25 @@ def main():
 
     progress_bar(1.0)
     print("\n")
-    sims.append(f_esc)
     np.save("simrun_%d" %next_run_id, f_esc)
 
-    #rebuild f_esc from all
-    f_esc = np.zeros(len_waves)
-    f_esc_err = np.zeros(len_waves)
+def main():
+    wavelengths, f_esc, f_esc_err, count = get_f_esc()
+    L_lambd_source = blackbody(wavelengths)
+    L_lambd_out = np.multiply(f_esc, L_lambd_source)    
+    L_lambd_low_err = np.multiply(f_esc-f_esc_err, L_lambd_source)
+    L_lambd_high_err = np.multiply(f_esc+f_esc_err, L_lambd_source)    
 
-    sims = np.array(sims)
-    for i in range(len(f_esc)):
-        bin = sims[:,i]
-        f_esc[i] = np.mean(bin)
-        f_esc_err[i] = np.std(bin)
-
-
-
-
-    #simple sanity check on total escape
-    # result = [p.status for p in photons.flatten()]
-    # n,b,_ = plt.hist(result,bins=2)
-    # print(n,b)
-    # plt.show()
-
-    #results by wavelength
-    # f_esc = np.zeros(len(wavelengths))
-    # for i in range(len(f_esc)):
-    #     f_esc[i] = [p.status for p in photons[i]].count(1)/len(photons[i])
-
-    # plt.close('all')
-    # plt.plot(wavelengths,f_esc)
-    # plt.fill_between(wavelengths,f_esc-f_esc_err,f_esc+f_esc_err,color='k',alpha=0.3)
-    # plt.xscale('log')
-    # plt.show()
+    plt.title("Radiation Spectra: source vs. escaped")
+    plt.plot(wavelengths, L_lambd_source, label="Source radiation", color='r')
+    plt.plot(wavelengths, L_lambd_out, label="Escaped radiation", color='b')
+    plt.fill_between(wavelengths,L_lambd_low_err,L_lambd_high_err,color='k',alpha=0.3,label=r"1-$\sigma$")
+    plt.legend()
+    plt.yscale('log')
+    plt.xscale('log')
+    plt.xlabel("wavelength bin [microns]")
+    plt.ylabel(r"$L_\lambda$ [erg s${}^{-1}$ cm${}^{-1}$]")
+    plt.show()
 
 
 if __name__ == '__main__':
