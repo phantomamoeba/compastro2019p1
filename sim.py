@@ -79,10 +79,53 @@ def get_super_f_esc():
 
         sample = []
         for _ in range(100):
-            sample.append(np.mean(np.random.choice(f_super,size=100,replace=False)))
+            sample.append(np.mean(np.random.choice(f_super,size=100,replace=True)))
 
         f_esc[i] = np.mean(sample)
         f_esc_err[i] = np.std(sample)
+
+    return wavelengths, f_esc, f_esc_err, len(simruns)
+
+
+def get_alt_super_f_esc():
+    #re-sampling ALL the runs to beat down the error
+    wavelengths = np.load("run_data/wavelengths.npy")
+
+    simruns = glob.glob("run_data/simrun_*.npy")
+    sims = []
+    for s in simruns:
+        try:
+            f_esc = np.load(s)
+            sims.append(f_esc)
+        except:
+            pass
+
+    f_esc = np.zeros(len(wavelengths))
+    f_esc_err = np.zeros(len(wavelengths))
+
+    sims = np.array(sims)
+
+    for i in range(len(wavelengths)):
+        progress_bar(float(i) / len(wavelengths))
+        f_super = sims[:,i] #1000 entries
+        #turn the 1000 into 100,000 photon results
+
+        p_super = np.zeros((100*len(f_super)))
+        for j in range(len(f_super)):
+            escape = int(f_super[j] * 100.)
+            p_super[j*100:j*100+escape+1] = 1 #since this is going to be randomly re-sampled below it
+                                              #is okay to just group this way
+
+        sample = []
+        for j in range(100): #the loop is like the replacement part
+            re_sample = np.random.choice(p_super,size=10000,replace=False)
+            escape = float(np.sum(re_sample))/float(len(re_sample)) #out of 10,000 photons, this is the escape fraction
+            sample.append(escape)
+
+        f_esc[i] = np.mean(sample)
+        f_esc_err[i] = np.std(sample)
+
+    print("\n")
 
     return wavelengths, f_esc, f_esc_err, len(simruns)
 
