@@ -78,7 +78,7 @@ def get_super_f_esc():
         f_super = sims[:,i]
 
         sample = []
-        for j in range(100):
+        for _ in range(100):
             sample.append(np.mean(np.random.choice(f_super,size=100,replace=False)))
 
         f_esc[i] = np.mean(sample)
@@ -183,50 +183,42 @@ def run_sim():
     np.save("simrun_%d" %next_run_id, f_esc)
 
 def main():
-    wavelengths, f_esc, f_esc_err, count = get_super_f_esc()
+    wavelengths, f_esc, f_esc_err, _ = get_super_f_esc()
 
     f_esc_high = f_esc + f_esc_err
     f_esc_low = f_esc-f_esc_err
-    f_esc_high[f_esc_high > 1.0] = 1.0
-    f_esc_low[f_esc_low < 0.0] = 0.0
-
 
     L_lambd_source = blackbody(wavelengths)
-    L_lambd_out = np.multiply(f_esc, L_lambd_source)    
-    L_lambd_low_err = np.multiply(f_esc_low, L_lambd_source)
-    L_lambd_high_err = np.multiply(f_esc_high, L_lambd_source)
+    L_lambd_out = f_esc * L_lambd_source
+    L_lambd_low_err = f_esc_low * L_lambd_source
+    L_lambd_high_err = f_esc_high * L_lambd_source
 
     plt.title("Radiation Spectra: source vs. escaped")
-    plt.plot(wavelengths, wavelengths* L_lambd_source, label="Source radiation", color='r')
-    plt.plot(wavelengths, wavelengths * L_lambd_out, label="Escaped radiation", color='b')
-    plt.fill_between(wavelengths,wavelengths * L_lambd_low_err, wavelengths * L_lambd_high_err,color='k',alpha=0.3,label=r"1-$\sigma$")
+    plt.plot(wavelengths, L_lambd_source, label="Source radiation", color='r')
+    plt.plot(wavelengths, L_lambd_out, label="Escaped radiation", color='b')
+    plt.fill_between(wavelengths, L_lambd_low_err, L_lambd_high_err,color='k',alpha=0.3,label=r"1-$\sigma$")
     plt.legend()
     plt.yscale('log')
     plt.xscale('log')
     plt.xlabel("wavelength bin [microns]")
-    plt.ylabel(r"$\lambda$ $L_\lambda$ [erg s${}^{-1}$]")
+    plt.ylabel(r"$L_\lambda$ [erg s${}^{-1}$ cm${}^{-1}$]")
 
-    plt.savefig("spectrum_1.png")
+    # plt.savefig("spectrum_1.png")
     plt.show()
-
-
-
     plt.close('all')
 
     mx = np.max(L_lambd_source)
     plt.title("Radiation Spectra: source vs. escaped (zoom and scaled)")
-    plt.plot(wavelengths, wavelengths * L_lambd_source/mx, label="Source radiation", color='r')
-    plt.plot(wavelengths, wavelengths * L_lambd_out/mx * 100, label="Escaped radiation x100", color='b')
+    plt.plot(wavelengths, L_lambd_source/mx, label="Source radiation", color='r')
+    plt.plot(wavelengths, L_lambd_out/mx * 100, label="Escaped radiation x100", color='b')
     plt.axvline(0.05,label="~0.20 constant absorption")
 
-    plt.legend()
-    #plt.yscale('log')
-    #plt.xscale('log')
-    plt.ylim(0,0.1)
+    plt.legend(loc=4)    
+    plt.ylim(0,1.05)
     plt.xlim(0.03,0.07)
     plt.xlabel("wavelength bin [microns]")
     plt.ylabel(r"Dimensionless Lum (scaled at $\lambda_{max}$)")
-    plt.savefig("spectrum_zoom.png")
+    # plt.savefig("spectrum_zoom.png")
     plt.show()
 
 
