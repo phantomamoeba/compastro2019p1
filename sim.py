@@ -176,6 +176,26 @@ def main():
     plt.show()
 
 
+
+    plt.close('all')
+
+    mx = np.max(L_lambd_source)
+    plt.title("Radiation Spectra: source vs. escaped (zoom and scaled)")
+    plt.plot(wavelengths, wavelengths * L_lambd_source/mx, label="Source radiation", color='r')
+    plt.plot(wavelengths, wavelengths * L_lambd_out/mx * 100, label="Escaped radiation x100", color='b')
+    plt.axvline(0.05,label="~0.20 constant absorption")
+
+    plt.legend()
+    #plt.yscale('log')
+    #plt.xscale('log')
+    plt.ylim(0,0.1)
+    plt.xlim(0.03,0.07)
+    plt.xlabel("wavelength bin [microns]")
+    plt.ylabel(r"Dimensionless Lum (scaled at $\lambda_{max}$)")
+    plt.savefig("spectrum_zoom.png")
+    plt.show()
+
+
 if __name__ == '__main__':
     main()
 
