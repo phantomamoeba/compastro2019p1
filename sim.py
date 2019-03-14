@@ -163,14 +163,14 @@ def main():
     L_lambd_high_err = np.multiply(f_esc_high, L_lambd_source)
 
     plt.title("Radiation Spectra: source vs. escaped")
-    plt.plot(wavelengths, L_lambd_source, label="Source radiation", color='r')
-    plt.plot(wavelengths, L_lambd_out, label="Escaped radiation", color='b')
-    plt.fill_between(wavelengths,L_lambd_low_err,L_lambd_high_err,color='k',alpha=0.3,label=r"1-$\sigma$")
+    plt.plot(wavelengths, wavelengths* L_lambd_source, label="Source radiation", color='r')
+    plt.plot(wavelengths, wavelengths * L_lambd_out, label="Escaped radiation", color='b')
+    plt.fill_between(wavelengths,wavelengths * L_lambd_low_err, wavelengths * L_lambd_high_err,color='k',alpha=0.3,label=r"1-$\sigma$")
     plt.legend()
     plt.yscale('log')
     plt.xscale('log')
     plt.xlabel("wavelength bin [microns]")
-    plt.ylabel(r"$L_\lambda$ [erg s${}^{-1}$ cm${}^{-1}$]")
+    plt.ylabel(r"$\lambda$ $L_\lambda$ [erg s${}^{-1}$ cm${}^{-2}$]")
     plt.show()
 
 
