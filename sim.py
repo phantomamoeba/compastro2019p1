@@ -33,7 +33,8 @@ def blackbody(wavelengths):
 
 def plot(fn=None):
     #just plot
-    wavelengths, f_esc, f_esc_err, count = get_f_esc()
+    #todo: maybe show 3-sigma if using super_f_esc()?
+    wavelengths, f_esc, f_esc_err, count = get_super_f_esc()#get_f_esc()
 
     f_esc_high = f_esc + f_esc_err
     f_esc_low = f_esc-f_esc_err
